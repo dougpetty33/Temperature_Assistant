@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Temperature Assistant</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="current_string">Current Temperature</string>
+    <string name="graph_string">Graph</string>
+    <string name="id_string">Find Temperature Device</string>
+    <string name="alert_dialog_title">Current Temperature</string>
+</resources>
