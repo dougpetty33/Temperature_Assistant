@@ -41,7 +41,8 @@
         android:id="@+id/dev_info"
         android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+        android:layout_alignParentStart="true"
+        android:focusable="false" />
 
     <WebView
         android:layout_width="fill_parent"
@@ -54,5 +55,18 @@
         android:visibility="invisible"
         android:focusableInTouchMode="false"
         android:focusable="false" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="textMultiLine"
+        android:ems="10"
+        android:id="@+id/dbgText"
+        android:layout_alignTop="@+id/tempGrph"
+        android:layout_above="@+id/idBtn"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
 
 </RelativeLayout>
