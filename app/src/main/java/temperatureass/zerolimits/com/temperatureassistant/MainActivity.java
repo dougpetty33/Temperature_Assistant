@@ -57,11 +57,12 @@ public class MainActivity extends ActionBarActivity {
         Button getTemp = (Button) findViewById(R.id.crntTemp);
         info = (EditText) findViewById(R.id.dev_info);
 
-       Thread t = new Thread(new Listener());
+        Thread t = new Thread(new Listener());
         t.start();
 
         id.setOnClickListener(new View.OnClickListener() {
 
+            @SuppressWarnings("UnusedAssignment")
             public void onClick(View v) {
 
                 sendPacket sp = new sendPacket();
@@ -104,15 +105,13 @@ public class MainActivity extends ActionBarActivity {
                 if (info.getText().toString().equals("")) {
                     Log.d(TAG, "Need to enter an IP address");
                     Toast.makeText(MainActivity.this, "Please enter an IP address", Toast.LENGTH_LONG).show();
-                }
-                else {
+                } else {
                     tempGraph.setVisibility(View.VISIBLE);
                     tempGraph.loadUrl("http://www.ampyourstrat.com/wp-content/uploads/android-logo.jpg");
                 }
             }
         });
     }
-
 
     private void openAlert(String temperature) {
         final AlertDialog.Builder alertBuilder = new AlertDialog.Builder(MainActivity.this);
@@ -130,8 +129,9 @@ public class MainActivity extends ActionBarActivity {
     }
 
     class Listener implements Runnable {
+        @SuppressWarnings("InfiniteLoopStatement")
         @Override
-        public void run(){
+        public void run() {
             try {
                 byte[] buffer = new byte[1024];
                 DatagramSocket sock = new DatagramSocket(PORT);
@@ -140,32 +140,36 @@ public class MainActivity extends ActionBarActivity {
                     sock.receive(incoming);
                     Log.d(TAG, "Receive from " + incoming.getAddress().getHostAddress());
                     String response = new String(incoming.getData());
-                    if(response.contains(MainActivity.SL_OK) && response.contains(MainActivity.ST_ContentDirectory)){
-                      runOnUiThread(new Runnable() {
-                          @Override
-                          public void run() {
-                              MainActivity.this.info.setText(incoming.getAddress().getHostAddress());
-                          }
-                      });
+                    if (response.contains(MainActivity.SL_OK) && response.contains(MainActivity.ST_ContentDirectory)) {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                MainActivity.this.info.setText(incoming.getAddress().getHostAddress());
+                            }
+                        });
                     }
                 }
             } catch (SocketException e) {
                 e.printStackTrace();
-            } catch (IOException e){
+                Log.e(TAG, "Socket Exception");
+            } catch (IOException e) {
                 e.printStackTrace();
+                Log.e(TAG, "IO Exception");
             }
         }
     }
 
     class sendPacket extends AsyncTask<Void, Void, Void> {
         private String search = SL_MSEARCH + NEWLINE + MX + NEWLINE + ST + ST_ContentDirectory + NEWLINE + NTS_DISCOVER + NEWLINE + USER_AGENT + NEWLINE + CONNECTION + NEWLINE + HOST + NEWLINE + NEWLINE;
-        @Override
-        protected void onPreExecute(){
-           MainActivity.this.info.setText("Looking for device..... ");
-        }
 
         @Override
-        protected Void doInBackground(Void... params){
+        protected void onPreExecute() {
+            MainActivity.this.info.setText("Looking for device..... ");
+        }
+
+        @SuppressWarnings("UnusedAssignment")
+        @Override
+        protected Void doInBackground(Void... params) {
             try {
                 Log.d(TAG, "Generating send packet");
                 DatagramSocket ds = new DatagramSocket();
@@ -177,8 +181,10 @@ public class MainActivity extends ActionBarActivity {
                 e.printStackTrace();
             } catch (SocketException e) {
                 e.printStackTrace();
+                Log.e(TAG, "Socket Exception");
             } catch (IOException e) {
                 e.printStackTrace();
+                Log.e(TAG, "IO Exception");
             }
             return null;
         }
