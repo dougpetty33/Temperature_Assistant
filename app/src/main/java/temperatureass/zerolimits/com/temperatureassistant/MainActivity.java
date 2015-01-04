@@ -19,18 +19,12 @@ import com.android.volley.toolbox.Volley;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 
-import org.apache.http.conn.util.InetAddressUtils;
-
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.MulticastSocket;
-import java.net.Socket;
 import java.net.SocketException;
 import java.net.UnknownHostException;
-import java.util.*;
 
 public class MainActivity extends ActionBarActivity {
     public static final String NEWLINE = "\r\n";
@@ -38,45 +32,30 @@ public class MainActivity extends ActionBarActivity {
     public static final String HOST = "Host: 239.255.255.250:1900";
     public static final String ADDRESS = "239.255.255.250";
     public static final String ST = "ST: ";
-    // public static final String LOCATION = "LOCATION";
-    // public static final String NT = "NT";
-    // public static final String NTS = "NTS";
     // public static final String SL_NOTIFY = "NOTIFY * HTTP/1.1";
     public static final String SL_MSEARCH = "M-SEARCH * HTTP/1.1";
-     public static final String SL_OK = "HTTP/1.1 200 OK";
+    public static final String SL_OK = "HTTP/1.1 200 OK";
     public static final String ST_ContentDirectory = "zerolimits:sprinkler";
     public static final String USER_AGENT = "User-Agent: stuff";
     public static final String CONNECTION = "Connection: close";
-
-    // public static final String NTS_ALIVE = "ssdp:alive";
-    //  public static final String NTS_BYEBYE = "ssdp:byebye";
-    //  public static final String NTS_UPDATE = "ssdp:update";
     public static final String NTS_DISCOVER = "MAN: \"ssdp:discover\"";
     public static final String MX = "MX: 5";
     public static final String TAG = "temp";
-    //  public static final String GRAPH_URL = "/graph.png";
 
-    private Button id;
-    private Button graph;
     private EditText info;
     private WebView tempGraph;
-    private EditText debugTxt;
-    private volatile DatagramPacket sender = null;
-    private Object lock;
-    private String search = SL_MSEARCH + NEWLINE + MX + NEWLINE + ST + ST_ContentDirectory + NEWLINE + NTS_DISCOVER + NEWLINE + USER_AGENT + NEWLINE + CONNECTION + NEWLINE + HOST + NEWLINE + NEWLINE;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.fragment_main);
-
+        Button id;
+        Button graph;
 
         id = (Button) findViewById(R.id.idBtn);
         graph = (Button) findViewById(R.id.grphBtn);
         Button getTemp = (Button) findViewById(R.id.crntTemp);
         info = (EditText) findViewById(R.id.dev_info);
-        debugTxt = (EditText) findViewById(R.id.dbgText);
 
        Thread t = new Thread(new Listener());
         t.start();
@@ -113,7 +92,7 @@ public class MainActivity extends ActionBarActivity {
                 que.add(sr);
 
                 //todo Setup code for sending query to the server for temperature
-                openAlert(v, message);
+                openAlert(message);
             }
         });
 
@@ -122,10 +101,9 @@ public class MainActivity extends ActionBarActivity {
 
             public void onClick(View v) {
                 tempGraph = (WebView) findViewById(R.id.tempGrph);
-                if (info.getText().toString() == "") {
+                if (info.getText().toString().equals("")) {
                     Log.d(TAG, "Need to enter an IP address");
                     Toast.makeText(MainActivity.this, "Please enter an IP address", Toast.LENGTH_LONG).show();
-                    return;
                 }
                 else {
                     tempGraph.setVisibility(View.VISIBLE);
@@ -136,7 +114,7 @@ public class MainActivity extends ActionBarActivity {
     }
 
 
-    private void openAlert(View view, String temperature) {
+    private void openAlert(String temperature) {
         final AlertDialog.Builder alertBuilder = new AlertDialog.Builder(MainActivity.this);
         alertBuilder.setTitle(R.string.alert_dialog_title);
         alertBuilder.setMessage(temperature);
@@ -156,7 +134,7 @@ public class MainActivity extends ActionBarActivity {
         public void run(){
             try {
                 byte[] buffer = new byte[1024];
-                DatagramSocket sock = new DatagramSocket(1900);
+                DatagramSocket sock = new DatagramSocket(PORT);
                 final DatagramPacket incoming = new DatagramPacket(buffer, buffer.length);
                 while (true) {
                     sock.receive(incoming);
@@ -180,7 +158,7 @@ public class MainActivity extends ActionBarActivity {
     }
 
     class sendPacket extends AsyncTask<Void, Void, Void> {
-
+        private String search = SL_MSEARCH + NEWLINE + MX + NEWLINE + ST + ST_ContentDirectory + NEWLINE + NTS_DISCOVER + NEWLINE + USER_AGENT + NEWLINE + CONNECTION + NEWLINE + HOST + NEWLINE + NEWLINE;
         @Override
         protected void onPreExecute(){
            MainActivity.this.info.setText("Looking for device..... ");
@@ -191,7 +169,7 @@ public class MainActivity extends ActionBarActivity {
             try {
                 Log.d(TAG, "Generating send packet");
                 DatagramSocket ds = new DatagramSocket();
-                DatagramPacket sendPacket = new DatagramPacket(search.getBytes(), search.getBytes().length, InetAddress.getByName(ADDRESS), 1900);
+                DatagramPacket sendPacket = new DatagramPacket(search.getBytes(), search.getBytes().length, InetAddress.getByName(ADDRESS), PORT);
                 ds.send(sendPacket);
                 ds.close();
                 ds = null;
